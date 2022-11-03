@@ -48,7 +48,7 @@ class Factory:
         sets = ""
         for key, val in data.items():
             sets += f"{key}='{val}', " if isinstance(
-                val, str) else f"{key}={str(val)}, "
+                val, str) else f"{key}={val}, "
         sets = sets.strip(", ")
         self.cursor.execute(
             f"UPDATE {table} SET {sets} WHERE id={id} RETURNING *;")

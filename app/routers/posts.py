@@ -13,6 +13,7 @@ router = APIRouter(
 
 @router.get("/", response_model=List[schemas.PostOut])
 def get_posts(db: Session = Depends(get_db), limit: int = 10, page: int = 1):
+    """Fetch all the posts created by all users"""
     query = db.query(models.Post, func.count(
         models.Vote.post_id).label("votes"))
     query = query.join(models.Vote, models.Post.id ==
@@ -26,6 +27,7 @@ def get_posts(db: Session = Depends(get_db), limit: int = 10, page: int = 1):
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
 async def add_post(new_post: schemas.PostCreate, db: Session = Depends(get_db), user=Depends(oauth2.get_current_user)):
+    """Creates a new post"""
     post = new_post.dict()
     post["user_id"] = user.id
     data = models.Post(**post)
@@ -42,10 +44,14 @@ def get_posts(db: Session = Depends(get_db), user=Depends(oauth2.get_current_use
     return posts
 
 
-@router.get("/{postID}", response_model=schemas.Post)
+@router.get("/{postID}", response_model=schemas.PostOut)
 async def get_post(postID: int, db: Session = Depends(get_db)):
-
-    post = db.query(models.Post).filter(models.Post.id == postID).first()
+    query = db.query(models.Post, func.count(
+        models.Vote.post_id).label("votes"))
+    query = query.join(models.Vote, models.Post.id ==
+                       models.Vote.post_id, isouter=True)
+    post = query.filter(models.Post.id == postID).group_by(
+        models.Post.id).first()
     if not post:
         raise HTTPException(
             status_code=404, detail=f"Post with id={postID} not found!")

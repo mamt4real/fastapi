@@ -8,6 +8,9 @@ router = APIRouter(
     prefix="/users", tags=["Users"]
 )
 
+@router.get("/")
+async def get_all_users( db: Session = Depends(get_db)):
+    pass
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.User)
 async def create_user(new_user: schemas.UserCreate, db: Session = Depends(get_db)):

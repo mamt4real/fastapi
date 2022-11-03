@@ -1,0 +1,31 @@
+version: '3'
+services:
+  api:
+    build: .
+    depends_on:
+      - postgres
+    ports:
+      - 8000:8000
+    # env_file:
+    #   - ./.env
+    volumes:
+      - ./:/usr/src/app:ro
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    environment:
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_NAME=fastapi
+      - DATABASE_USER=postgres
+      - DATABASE_PASS=THEspecial4343
+      - JWT_SECRET=my_long_secret_key_which_encrupt_the_fast_api
+      - JWT_ALGORITHM=HS256
+      - JWT_EXPIRES_IN=60
+  postgres:
+    image: postgres
+    environment:
+      - POSTGRES_PASSWORD=THEspecial4343
+      - POSTGRES_DB=fastapi
+    volumes:
+      - postgres-db: /var/lib/postgresql/data
+volumes:
+  postgres-db:
